@@ -1,0 +1,41 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins:
+                  - "${FRONTEND_URL:http://localhost:5173}"
+                  - "http://localhost:5174"
+                  - "http://localhost:3000"
+                  - "http://localhost:4200"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
+          routes:
+            - id: match-service
+              uri: ${MATCH_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/match/**
+            - id: monolith
+              uri: ${MONOLITH_URL:http://localhost:8081}
+              predicates:
+                - Path=/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
